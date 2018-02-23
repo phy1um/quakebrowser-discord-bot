@@ -4,7 +4,7 @@ import asyncio
 from functools import cmp_to_key
 
 def playersCmp(a, b):
-    print("cmp {} > {}".format(a["info"]["players"], b["info"]["players"]))
+    #print("cmp {} > {}".format(a["info"]["players"], b["info"]["players"]))
     return int(b["info"]["players"]) - int(a["info"]["players"])
 
 class ServerStatus:
@@ -13,6 +13,7 @@ class ServerStatus:
         self.url = url
         self._on_servers = asyncio.coroutine(lambda x: 0)
         self.servers = []
+        self.last_msg = hash("")
 
     def update(self):
         req = requests.get(self.url)

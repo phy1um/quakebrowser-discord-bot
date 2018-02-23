@@ -5,6 +5,7 @@ from serverstatus import ServerStatus
 token = "NDE5Nzg5NTYyOTY1OTE3Njk3.DX1UgA.yZpv9xCJNBKtzQc3LtpwCt6J5FU" 
 client = discord.Client()
 active_chans= {}
+api = "http://phylum.sureis.sexy/browser"
 
 async def clear_chan(c):
     logs = client.logs_from(c,limit=10)
@@ -16,6 +17,7 @@ async def clear_chan(c):
 async def on_ready():
     print("Logged in: " + client.user.name + ":" + client.user.id)
 
+last_msg = hash("")
 
 @client.async_event
 async def on_message(msg):
@@ -34,19 +36,19 @@ async def on_message(msg):
                 print(c)
                 if c == "browser-init":
                     print("TARGET: " + str(chan.server)+":"+str(chan))
-                    x = ServerStatus('http://0.0.0.0:3000/api/list')
-                    last_msg = hash("")
+                    x = ServerStatus(api)
                     @x.async_server_handler
                     async def put_message(s):
                         h = hash(s)
-                        if h != last_msg:
+                        if h != x.last_msg:
+                            x.last_msg = h
                             await clear_chan(chan)
                             await client.send_message(chan, x.get_browser_string())
                         else:
                             print("duplicate of last message")
                     key = str(chan.server)+":"+str(chan)
                     active_chans[key] = asyncio.Event()
-                    interval = 120
+                    interval = 10
                     counter = 0
                     x.update()
                     while not active_chans[key].is_set():
