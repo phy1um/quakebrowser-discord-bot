@@ -53,7 +53,7 @@ class ServerStatus:
             lines += "\tmap: {}\n".format(info["map"])
             lines += "\tmode: {}\n".format(info["gameTypeShort"])
             lines += "\tplayers: {}/{}\n".format(info["players"], info["maxPlayers"])
-            lines += "\tplay: {}\n".format("/connect ???")
+            lines += "\tplay: /connect {}:{}\n".format(s["address"], s["port"])
             lines += "====================```"
 
             build += lines

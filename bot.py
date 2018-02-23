@@ -35,10 +35,15 @@ async def on_message(msg):
                 if c == "browser-init":
                     print("TARGET: " + str(chan.server)+":"+str(chan))
                     x = ServerStatus('http://0.0.0.0:3000/api/list')
+                    last_msg = hash("")
                     @x.async_server_handler
                     async def put_message(s):
-                        await clear_chan(chan)
-                        await client.send_message(chan, x.get_browser_string())
+                        h = hash(s)
+                        if h != last_msg:
+                            await clear_chan(chan)
+                            await client.send_message(chan, x.get_browser_string())
+                        else:
+                            print("duplicate of last message")
                     key = str(chan.server)+":"+str(chan)
                     active_chans[key] = asyncio.Event()
                     interval = 120
