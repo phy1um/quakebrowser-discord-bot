@@ -7,51 +7,63 @@ default_class = lambda: None
 
 
 class ChatCommand(object):
-    ''' 
+    '''a command which is run in response to a chat command
+
     very non-OOP class for representing a chat command
     note: define a sub-class then call SubClass.register(..)
     instances are created through ChatCommand.process_text()
     do not manually create instances of this class or any inheriting
-    classes!'''
+    classes!
+    
+    Attributes:
+        args: array of arguments for the command executing
+        chan: discord.py channel for the context this command executes in
+        sender: discord.py user for the context ...
+    '''
     # the prefix can be re-defined wherever, possibly per-chanhel-connection?
     command_prefix = "!"
     name = "PLACEHOLDER"
 
     def __init__(self):
-        """
-        setup new instance with placeholder values
-        """
+        """setup new instance with placeholder values"""
         self.args = []
         self.chan = None
         self.sender = None
         
     def bind_args(self, tokens):
-        """
-        bind command arguments in an array
+        """bind command arguments in an array
+
         note self.args[0] == registered name (like sys.argv)
+
+        Args:
+            tokens: 
         """
         for t in tokens:
             self.args.append(t)
 
     def bind_context(self, channel, sender):
-        """
-        bind discord context, this MUST be called before execute!
+        """bind discord context for execution. 
+        
+        note: this MUST be called before execute!
+
+        Args:
+            channel: discord.py channel object
+            sender: ... user object
         """
         self.chan = channel
         self.sender = sender
 
     def _body(self):
-        """
-        override this for commands to implement execution functionality
+        """override this for commands to implement execution functionality
         """
         warnings.warn("Default body in ChatCommand")
         return
 
     def execute(self):
-        """
-        called to start execution - do not override this in child classes.
-        this is where logic for valid state is done because we cannot do that
-        at instance construction!
+        """perform the action associated with this command.
+
+        do not override this in child classes. this is where logic for valid
+        state is done because we cannot do that at instance construction!
         """
         if self.chan == None or self.sender == None:
             raise RuntimeError("Invalid ChatCommand state: no context bound")
@@ -66,8 +78,10 @@ class ChatCommand(object):
 
     @classmethod
     def register(cls, name):
-        """
-        register this CLASS with a given name, to be looked up in parsing
+        """ register this CLASS with a given name, to be looked up in parsing
+
+        Args:
+            name: string name associating this class to a discord chat command
         """
         global chat_commands
         if name in chat_commands:
@@ -79,9 +93,14 @@ class ChatCommand(object):
     
     @classmethod
     def process_text(cls, text):
-        """
-        parse text and check for a valid registered command call
-        RETURNS: ChatCommand INSTANCE which can be executed
+        """parse text and check for a valid registered command call
+
+        Args:
+            text: string message from discord
+
+        Returns: 
+            ChatCommand instance which can be executed, even if the command
+                given in text was invalid (see set_default)
         """
         global chat_commands
         # early out for empty strings
@@ -101,8 +120,7 @@ class ChatCommand(object):
 
     @classmethod
     def set_default(cls):
-        """
-        set default class for process_text() commands where no command is found
+        """set default class for process_text() commands where no command is found
         """
         global default_class
         default_class = cls

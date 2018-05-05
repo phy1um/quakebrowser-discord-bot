@@ -5,9 +5,12 @@ import server_api
 import asyncio
 import threading
 
+# TODO (phylum): remove this token before github
 token = "NDE5Nzg5NTYyOTY1OTE3Njk3.DX1UgA.yZpv9xCJNBKtzQc3LtpwCt6J5FU" 
+# server API url
 url = "http://phylum.sureis.sexy/browser"
-api_params = "?game=CPMA&country=AU|NZ|SG"
+# temporary API parameters
+api_params = "game=CPMA&country=AU|NZ|SG"
 
 class ChatInit(ChatCommand):
     def _body(self):
@@ -16,7 +19,6 @@ class ChatInit(ChatCommand):
 class ChatTest(ChatCommand):
     def _body(self):
         print("Ayy messageo")
-
 @bot.client.async_event
 async def on_message(msg):
     if(msg.author == bot.client.user):
@@ -35,7 +37,7 @@ async def run_connections():
     while True:
         async for servers in api.get_updating_servers(api_params, interval=5):
             async for con in ChannelCon.connection_iter():
-                await con.update(servers)
+                async con.update(servers)
         asyncio.sleep(0.1)
 
 
