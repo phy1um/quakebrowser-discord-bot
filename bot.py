@@ -5,7 +5,7 @@ from serverstatus import ServerStatus
 token = "NDE5Nzg5NTYyOTY1OTE3Njk3.DX1UgA.yZpv9xCJNBKtzQc3LtpwCt6J5FU" 
 client = discord.Client()
 active_chans= {}
-api = "http://phylum.sureis.sexy/browser"
+api = "http://phylum.sureis.sexy/browser?game=CPMA&country=AU|NZ|JP|SG"
 
 async def clear_chan(c):
     logs = client.logs_from(c,limit=10)
@@ -44,8 +44,8 @@ async def on_message(msg):
                             x.last_msg = h
                             await clear_chan(chan)
                             await client.send_message(chan, x.get_browser_string())
-                        else:
-                            print("duplicate of last message")
+                        #else:
+                            #print("duplicate of last message")
                     key = str(chan.server)+":"+str(chan)
                     active_chans[key] = asyncio.Event()
                     interval = 10
