@@ -64,13 +64,14 @@ async def get_send_message(c, m):
     return await bot.client.send_message(c, m)
 
 class MessageSenderCon(ChannelCon):
-    def __init__(self, chan, url_params):
+    def __init__(self, chan, url_params, message_count = 5):
         print("MAKING SENDER CONNECTION")
         super().__init__(chan, url_params)
         self.messages = []
+        self.message_count = message_count
 
     async def make_messages(self):
-        for i in range(5):
+        for i in range(self.message_count):
             m = await get_send_message(self.chan, "```BROWSER BOT PLACEHOLDER```")
             self.messages.append(m)
 

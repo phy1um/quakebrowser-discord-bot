@@ -14,7 +14,14 @@ api_params = "game=CPMA&country=AU|NZ|SG"
 class ChatInit(ChatCommand):
     """chat command handler for initializing server browser"""
     def _body(self):
-        MessageSenderCon(self.chan, api_params)
+        count = 2
+        if len(self.args) > 1:
+            try:
+                count = int(self.args[1])
+            except:
+                pass
+        MessageSenderCon(self.chan, api_params, message_count=count)
+
 
 class ChatTest(ChatCommand):
     """trivial test that chat commands are working"""
@@ -35,6 +42,7 @@ async def on_message(msg):
         print("Command processed = {}".format(cmd))
         cmd.bind_context(chan, sender)
         cmd.execute()
+        await bot.client.delete_message(msg)
 
 async def run_connections():
     api = server_api.ServerAPI(url)
