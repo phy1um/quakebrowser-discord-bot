@@ -32,6 +32,7 @@ async def on_message(msg):
     perms = chan.permissions_for(sender)
     if perms.manage_server:
         cmd = ChatCommand.process_text(body)
+        print("Command processed = {}".format(cmd))
         cmd.bind_context(chan, sender)
         cmd.execute()
 
@@ -40,7 +41,7 @@ async def run_connections():
     while True:
         async for servers in api.get_updating_servers(api_params, interval=5):
             async for con in ChannelCon.connection_iter():
-                async con.update(servers)
+                await con.update(servers)
         asyncio.sleep(0.1)
 
 

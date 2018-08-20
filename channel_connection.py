@@ -1,4 +1,5 @@
 import bot
+import pdb
 from functools import cmp_to_key
 
 class ChannelCon(object):
@@ -55,19 +56,29 @@ class ChannelCon(object):
 def servers_sort(a,b):
     return int(b["info"]["players"]) - int(a["info"]["players"])
 
+async def get_send_message(c, m):
+#    bot.client.send_message(c, m)
+#    logs = bot.client.logs_from(c, limit=1)
+#    async for msg in logs:
+#        return msg
+    return await bot.client.send_message(c, m)
+
 class MessageSenderCon(ChannelCon):
     def __init__(self, chan, url_params):
         print("MAKING SENDER CONNECTION")
         super().__init__(chan, url_params)
         self.messages = []
+
+    async def make_messages(self):
         for i in range(5):
-            m = bot.client.send_message(chan, "```BROWSER BOT PLACEHOLDER```")
+            m = await get_send_message(self.chan, "```BROWSER BOT PLACEHOLDER```")
             self.messages.append(m)
 
-
     async def update(self, servers):
+        if len(self.messages) == 0:
+            await self.make_messages()
         servers = sorted(servers, key=cmp_to_key(servers_sort))
-        build = ["{:>20}\n====================\n".format("oapfs server browser")];
+        build = "{:>20}\n====================\n".format("oapfs server browser");
         msg_target = 0
         for s in servers:
             flag = ":question:"
@@ -78,20 +89,22 @@ class MessageSenderCon(ChannelCon):
 
             chunk_string = ""
             info = s["info"]
-            chunk_string.append("{} **{}** ({})\n".format(flag, info["serverName"], info["gameDir"]))
-            chunk_string.append("```====================\n")
-            chunk_string.append("\tmap: {}\n".format(info["map"]))
-            chunk_string.append("\tmode: {}\n".format(info["gameTypeShort"]))
-            chunk_string.append("\tplayers: {}/{}\n".format(info["players"], info["maxPlayers"]))
-            chunk_string.append("\tplay: /connect {}:{}\n".format(s["address"], s["port"]))
-            chunk_string.append("====================```")
+            chunk_string += "{} **{}** ({})\n".format(flag, info["serverName"], info["gameDir"])
+            chunk_string += "```====================\n"
+            chunk_string += "\tmap: {}\n".format(info["map"])
+            chunk_string += "\tmode: {}\n".format(info["gameTypeShort"])
+            chunk_string += "\tplayers: {}/{}\n".format(info["players"], info["maxPlayers"])
+            chunk_string += "\tplay: /connect {}:{}\n".format(s["address"], s["port"])
+            chunk_string += "====================```"
             if len(chunk_string) > 2000:
                 print("Ignoring extra length server - {}".format(info["serverName"]))
                 continue
             if len(build) + len(chunk_string) > 2000:
-                await bot.client.edit_message(self.message[msg_target], new_content = build)
+                await bot.client.edit_message(self.messages[msg_target], new_content = build)
+                msg_target += 1
                 build = chunk_string
             else:
-                build.append(chunk_string)
+                build += chunk_string
+        await bot.client.edit_message(self.messages[msg_target], new_content=build)
 
 

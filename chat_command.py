@@ -14,7 +14,7 @@ class ChatCommand(object):
     instances are created through ChatCommand.process_text()
     do not manually create instances of this class or any inheriting
     classes!
-    
+
     Attributes:
         args: array of arguments for the command executing
         chan: discord.py channel for the context this command executes in
@@ -29,21 +29,21 @@ class ChatCommand(object):
         self.args = []
         self.chan = None
         self.sender = None
-        
+
     def bind_args(self, tokens):
         """bind command arguments in an array
 
         note self.args[0] == registered name (like sys.argv)
 
         Args:
-            tokens: 
+            tokens:
         """
         for t in tokens:
             self.args.append(t)
 
     def bind_context(self, channel, sender):
-        """bind discord context for execution. 
-        
+        """bind discord context for execution.
+
         note: this MUST be called before execute!
 
         Args:
@@ -88,9 +88,9 @@ class ChatCommand(object):
             # override for duplicate names, but log it!
             warnings.warn("Duplicate command registered - overriding "+name,
                 stacklevel=3)
-        chat_commands[name] = cls 
+        chat_commands[name] = cls
         cls.name = name
-    
+
     @classmethod
     def process_text(cls, text):
         """parse text and check for a valid registered command call
@@ -98,14 +98,15 @@ class ChatCommand(object):
         Args:
             text: string message from discord
 
-        Returns: 
+        Returns:
             ChatCommand instance which can be executed, even if the command
                 given in text was invalid (see set_default)
         """
         global chat_commands
+        global default_class
         # early out for empty strings
         if len(text) < 0:
-            return
+            return default_class()
         if text[0] == cls.command_prefix:
             # tokenize without prefix character
             tokens = text[1:].split(" ")
@@ -113,18 +114,25 @@ class ChatCommand(object):
             if tokens[0] in chat_commands:
                 cmd = chat_commands[tokens[0]]()
                 cmd.bind_args(tokens)
+                if cmd == None:
+                    print("Somehow matched none command! {}".format(tokens[0]))
                 return cmd
             else:
                 logging.info("Unregistered command {} called".format(tokens[0]))
+                print("Returning default command handler class")
                 return default_class()
+        else:
+            return default_class()
 
     @classmethod
     def set_default(cls):
         """set default class for process_text() commands where no command is found
         """
+        print("Setting default chat command class globally")
         global default_class
         default_class = cls
-                
+        print(default_class)
+
 
 class CommandNull(ChatCommand):
     """
@@ -133,7 +141,7 @@ class CommandNull(ChatCommand):
     def _body(self):
         pass
 
-# set this class as the default!    
+# set this class as the default!
 CommandNull.set_default()
 
 class CommandsHelp(ChatCommand):
@@ -152,4 +160,4 @@ class CommandsHelp(ChatCommand):
             msg += "{}: {}\n".format(key, c._helptext())
         # finally send message using bot.client (logged in client)
         bot.client.message_send(self.chan, msg)
-            
+

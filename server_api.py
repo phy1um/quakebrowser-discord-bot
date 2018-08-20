@@ -12,7 +12,7 @@ class ServerAPI(object):
     """
     def __init__(self, url):
         """create new server API link
-        
+
         Args:
             url: string of the API base url (no params)
         """
@@ -20,10 +20,10 @@ class ServerAPI(object):
         self.bad_return = False
 
     async def get_updating_servers(self, path, interval = 30):
-        """async generator for getting server data. 
-        
+        """async generator for getting server data.
+
         runs every interval seconds. bad request to server url breaks the loop.
-        there is no terminating condition here. use with async-for and break 
+        there is no terminating condition here. use with async-for and break
         inside that to terminate!
 
         Args:
