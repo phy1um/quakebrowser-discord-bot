@@ -11,13 +11,13 @@ class ChannelCon(object):
         (and can be iterated over with other connections).
 
         Class Attributes:
-            connections: array of registered connections (instances of this 
+            connections: array of registered connections (instances of this
                 class)
 
         Attributes:
-            chan: a discord.py object representing the channel this connection 
+            chan: a discord.py object representing the channel this connection
                 acts on
-            url_params: the url parameters associated with the server info this 
+            url_params: the url parameters associated with the server info this
                 class will be acting on
 
     """
@@ -33,7 +33,7 @@ class ChannelCon(object):
         return "{}?{}".format(url_base, self.url_params)
 
     async def update(self, servers):
-       pass 
+       pass
 
     @classmethod
     def register(cls, obj):
@@ -60,11 +60,16 @@ class MessageSenderCon(ChannelCon):
     def __init__(self, chan, url_params):
         print("MAKING SENDER CONNECTION")
         super().__init__(chan, url_params)
-        self.last_msg = -1
+        self.messages = []
+        for i in range(5):
+            m = bot.client.send_message(chan, "```BROWSER BOT PLACEHOLDER```")
+            self.messages.append(m)
+
 
     async def update(self, servers):
         servers = sorted(servers, key=cmp_to_key(servers_sort))
         build = ["{:>20}\n====================\n".format("oapfs server browser")];
+        msg_target = 0
         for s in servers:
             flag = ":question:"
             if "location" in s and "countryCode" in s["location"]:
@@ -72,24 +77,23 @@ class MessageSenderCon(ChannelCon):
                 if cc.upper() != "UN":
                     flag = ":flag_{}:".format(cc.lower())
 
+            chunk_string = ""
             info = s["info"]
-            build.append("{} **{}** ({})\n".format(flag, info["serverName"], info["gameDir"]))
-            build.append("```====================\n")
-            build.append("\tmap: {}\n".format(info["map"]))
-            build.append("\tmode: {}\n".format(info["gameTypeShort"]))
-            build.append("\tplayers: {}/{}\n".format(info["players"], info["maxPlayers"]))
-            build.append("\tplay: /connect {}:{}\n".format(s["address"], s["port"]))
-            build.append("====================```")
-
-        message = build.join("")
-        msg_hash = hash(message)
-        if msg_hash == self.last_msg:
-            return
-        else:
-            self.last_msg = msg_hash
-            await bot.clear_chan(self.chan)
-            await bot.client.send_message(self.chan, message)
-
+            chunk_string.append("{} **{}** ({})\n".format(flag, info["serverName"], info["gameDir"]))
+            chunk_string.append("```====================\n")
+            chunk_string.append("\tmap: {}\n".format(info["map"]))
+            chunk_string.append("\tmode: {}\n".format(info["gameTypeShort"]))
+            chunk_string.append("\tplayers: {}/{}\n".format(info["players"], info["maxPlayers"]))
+            chunk_string.append("\tplay: /connect {}:{}\n".format(s["address"], s["port"]))
+            chunk_string.append("====================```")
+            if len(chunk_string) > 2000:
+                print("Ignoring extra length server - {}".format(info["serverName"]))
+                continue
+            if len(build) + len(chunk_string) > 2000:
+                await bot.client.edit_message(self.message[msg_target], new_content = build)
+                build = chunk_string
+            else:
+                build.append(chunk_string)
 
 
-            
+
