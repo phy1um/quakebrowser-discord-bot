@@ -10,7 +10,6 @@ class ChannelCon(object):
         instance of any subclass will be registered to the central "service"
         (and can be iterated over with other connections).
 
-        Class Attributes:
             connections: array of registered connections (instances of this
                 class)
 
@@ -94,6 +93,5 @@ class MessageSenderCon(ChannelCon):
                 build = chunk_string
             else:
                 build.append(chunk_string)
-
 
 

@@ -4,21 +4,24 @@ from chat_command import ChatCommand, CommandsHelp
 import server_api
 import asyncio
 import threading
+from settings import DISCORD_API_TOKEN
 
-# TODO (phylum): remove this token before github
-token = "NDE5Nzg5NTYyOTY1OTE3Njk3.DX1UgA.yZpv9xCJNBKtzQc3LtpwCt6J5FU" 
 # server API url
 url = "http://phylum.sureis.sexy/browser"
 # temporary API parameters
 api_params = "game=CPMA&country=AU|NZ|SG"
 
 class ChatInit(ChatCommand):
+    """chat command handler for initializing server browser"""
     def _body(self):
         MessageSenderCon(self.chan, api_params)
 
 class ChatTest(ChatCommand):
+    """trivial test that chat commands are working"""
     def _body(self):
         print("Ayy messageo")
+
+
 @bot.client.async_event
 async def on_message(msg):
     if(msg.author == bot.client.user):
@@ -46,8 +49,10 @@ if __name__ == "__main__":
     ChatTest.register("foo")
     class RunDiscord(threading.Thread):
         def run(self):
-            bot.client.run(token)
+            bot.client.run(DISCORD_API_TOKEN)
     RunDiscord().start()
+    # start async loop OR just add this task (as discord.py might get in first?)
+    # TODO (phylum): determine if this is a race condition..
     loop = asyncio.get_event_loop()
     if not loop.is_running():
         loop.run_until_complete(run_connections())
