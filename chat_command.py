@@ -3,7 +3,7 @@ import logging
 import bot
 
 chat_commands = {}
-default_class = lambda: None
+default_class = None
 
 
 class ChatCommand(object):
@@ -65,7 +65,7 @@ class ChatCommand(object):
         do not override this in child classes. this is where logic for valid
         state is done because we cannot do that at instance construction!
         """
-        if self.chan == None or self.sender == None:
+        if self.chan is None or self.sender is None:
             raise RuntimeError("Invalid ChatCommand state: no context bound")
         self._body()
 
@@ -87,7 +87,7 @@ class ChatCommand(object):
         if name in chat_commands:
             # override for duplicate names, but log it!
             warnings.warn("Duplicate command registered - overriding "+name,
-                stacklevel=3)
+                          stacklevel=3)
         chat_commands[name] = cls
         cls.name = name
 
@@ -114,11 +114,12 @@ class ChatCommand(object):
             if tokens[0] in chat_commands:
                 cmd = chat_commands[tokens[0]]()
                 cmd.bind_args(tokens)
-                if cmd == None:
+                if cmd is None:
                     print("Somehow matched none command! {}".format(tokens[0]))
                 return cmd
             else:
-                logging.info("Unregistered command {} called".format(tokens[0]))
+                logging.info("Unregistered command {} called".format(
+                    tokens[0]))
                 print("Returning default command handler class")
                 return default_class()
         else:
@@ -144,6 +145,7 @@ class CommandNull(ChatCommand):
 # set this class as the default!
 CommandNull.set_default()
 
+
 class CommandsHelp(ChatCommand):
     """
     command for listing all commands
@@ -160,4 +162,3 @@ class CommandsHelp(ChatCommand):
             msg += "{}: {}\n".format(key, c._helptext())
         # finally send message using bot.client (logged in client)
         bot.client.message_send(self.chan, msg)
-

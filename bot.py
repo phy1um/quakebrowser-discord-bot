@@ -6,7 +6,7 @@ client = discord.Client()
 
 
 async def clear_chan(c):
-    logs = client.logs_from(c,limit=10)
+    logs = client.logs_from(c, limit=10)
     async for msg in logs:
         await client.delete_message(msg)
 
@@ -21,5 +21,3 @@ async def on_server_join(server):
     print("Joined " + str(server))
     for ch in server.channels:
         print("Chan: " + str(ch))
-
-

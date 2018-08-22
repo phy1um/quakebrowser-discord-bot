@@ -4,6 +4,7 @@ import logging
 import asyncio
 import requests
 
+
 class ServerAPI(object):
     """abscraction for getting data from a quake server API
 
@@ -19,7 +20,7 @@ class ServerAPI(object):
         self.url_base = url
         self.bad_return = False
 
-    async def get_updating_servers(self, path, interval = 30):
+    async def get_updating_servers(self, path, interval=30):
         """async generator for getting server data.
 
         runs every interval seconds. bad request to server url breaks the loop.

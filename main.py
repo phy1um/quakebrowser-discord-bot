@@ -11,6 +11,7 @@ url = "http://phylum.sureis.sexy/browser"
 # temporary API parameters
 api_params = "game=CPMA&country=AU|NZ|SG"
 
+
 class ChatInit(ChatCommand):
     """chat command handler for initializing server browser"""
     def _body(self):
@@ -56,15 +57,14 @@ async def run_connections():
 if __name__ == "__main__":
     ChatInit.register("browser-init")
     ChatTest.register("foo")
+
     class RunDiscord(threading.Thread):
         def run(self):
             bot.client.run(DISCORD_API_TOKEN)
     RunDiscord().start()
-    # start async loop OR just add this task (as discord.py might get in first?)
-    # TODO (phylum): determine if this is a race condition..
+    # start async loop OR just add this task (discord.py might get in first?)
     loop = asyncio.get_event_loop()
     if not loop.is_running():
         loop.run_until_complete(run_connections())
     else:
         loop.create_task(run_connections())
-

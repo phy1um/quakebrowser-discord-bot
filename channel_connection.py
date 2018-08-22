@@ -3,6 +3,7 @@ import pdb
 from functools import cmp_to_key
 from strings import SERVER_CHUNK_STRING
 
+
 class ChannelCon(object):
     """connection between the server API and a discord channel.
 
@@ -34,7 +35,7 @@ class ChannelCon(object):
         return "{}?{}".format(url_base, self.url_params)
 
     async def update(self, servers):
-       pass
+        pass
 
     @classmethod
     def register(cls, obj):
@@ -54,18 +55,16 @@ class ChannelCon(object):
         for i in list_snapshot:
             yield i
 
-def servers_sort(a,b):
+
+def servers_sort(a, b):
     return int(b["info"]["players"]) - int(a["info"]["players"])
 
 async def get_send_message(c, m):
-#    bot.client.send_message(c, m)
-#    logs = bot.client.logs_from(c, limit=1)
-#    async for msg in logs:
-#        return msg
     return await bot.client.send_message(c, m)
 
+
 class MessageSenderCon(ChannelCon):
-    def __init__(self, chan, url_params, message_count = 5):
+    def __init__(self, chan, url_params, message_count=5):
         print("MAKING SENDER CONNECTION")
         super().__init__(chan, url_params)
         self.messages = []
@@ -73,17 +72,20 @@ class MessageSenderCon(ChannelCon):
 
     async def make_messages(self):
         for i in range(self.message_count):
-            m = await get_send_message(self.chan, "```BROWSER BOT PLACEHOLDER```")
+            m = await get_send_message(self.chan,
+                                       "```BROWSER BOT PLACEHOLDER```")
             self.messages.append(m)
 
     async def update(self, servers):
         if len(self.messages) == 0:
             await self.make_messages()
         servers = sorted(servers, key=cmp_to_key(servers_sort))
-        build = "{:>20}\n====================\n".format("oapfs server browser");
+        build = "{:>20}\n====================\n".format(
+                "oapfs server browser")
         build = []
         build_len = 0
-        build.append("{:>20}\n====================\n".format("oapfs server browser"))
+        build.append("{:>20}\n====================\n"
+                     .format("oapfs server browser"))
         build_len += len(build[-1])
 
         msg_target = 0
@@ -93,13 +95,15 @@ class MessageSenderCon(ChannelCon):
                 cc = s["location"]["countryCode"]
                 if cc.upper() != "UN":
                     flag = ":flag_{}:".format(cc.lower())
-
-
             info = s["info"]
             chunk_string = SERVER_CHUNK_STRING.format(flag, info["serverName"],
-                    info["gameDir"], info["map"], info["gameTypeShort"],
-                    info["players"], info["maxPlayers"], s["address"],
-                    s["port"])
+                                                      info["gameDir"],
+                                                      info["map"],
+                                                      info["gameTypeShort"],
+                                                      info["players"],
+                                                      info["maxPlayers"],
+                                                      s["address"],
+                                                      s["port"])
             if len(chunk_string) > 2000:
                 print("Ignoring extra length server - {}".format(
                     info["serverName"]))
@@ -108,7 +112,7 @@ class MessageSenderCon(ChannelCon):
             build.append(chunk_string)
             if build_len + len(chunk_string) > 2000:
                 await bot.client.edit_message(self.messages[msg_target],
-                        new_content = "".join(build))
+                                              "".join(build))
                 msg_target += 1
                 if msg_target >= len(self.messages):
                     print("Exceeded maximum post size for this bot")
@@ -119,6 +123,4 @@ class MessageSenderCon(ChannelCon):
                 build_len += len(build[-1])
         if len(build) > 0:
             await bot.client.edit_message(self.messages[msg_target],
-                    new_content="".join(build))
-
-
+                                          new_content="".join(build))
