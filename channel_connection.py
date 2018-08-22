@@ -1,6 +1,7 @@
 import bot
 import pdb
 from functools import cmp_to_key
+from strings import SERVER_CHUNK_STRING
 
 class ChannelCon(object):
     """connection between the server API and a discord channel.
@@ -80,6 +81,11 @@ class MessageSenderCon(ChannelCon):
             await self.make_messages()
         servers = sorted(servers, key=cmp_to_key(servers_sort))
         build = "{:>20}\n====================\n".format("oapfs server browser");
+        build = []
+        build_len = 0
+        build.append("{:>20}\n====================\n".format("oapfs server browser"))
+        build_len += len(build[-1])
+
         msg_target = 0
         for s in servers:
             flag = ":question:"
@@ -88,24 +94,31 @@ class MessageSenderCon(ChannelCon):
                 if cc.upper() != "UN":
                     flag = ":flag_{}:".format(cc.lower())
 
-            chunk_string = ""
+
             info = s["info"]
-            chunk_string += "{} **{}** ({})\n".format(flag, info["serverName"], info["gameDir"])
-            chunk_string += "```====================\n"
-            chunk_string += "\tmap: {}\n".format(info["map"])
-            chunk_string += "\tmode: {}\n".format(info["gameTypeShort"])
-            chunk_string += "\tplayers: {}/{}\n".format(info["players"], info["maxPlayers"])
-            chunk_string += "\tplay: /connect {}:{}\n".format(s["address"], s["port"])
-            chunk_string += "====================```"
+            chunk_string = SERVER_CHUNK_STRING.format(flag, info["serverName"],
+                    info["gameDir"], info["map"], info["gameTypeShort"],
+                    info["players"], info["maxPlayers"], s["address"],
+                    s["port"])
             if len(chunk_string) > 2000:
-                print("Ignoring extra length server - {}".format(info["serverName"]))
+                print("Ignoring extra length server - {}".format(
+                    info["serverName"]))
                 continue
-            if len(build) + len(chunk_string) > 2000:
-                await bot.client.edit_message(self.messages[msg_target], new_content = build)
+
+            build.append(chunk_string)
+            if build_len + len(chunk_string) > 2000:
+                await bot.client.edit_message(self.messages[msg_target],
+                        new_content = "".join(build))
                 msg_target += 1
-                build = chunk_string
+                if msg_target >= len(self.messages):
+                    print("Exceeded maximum post size for this bot")
+                    return
+                build = []
+                build_len = 0
             else:
-                build += chunk_string
-        await bot.client.edit_message(self.messages[msg_target], new_content=build)
+                build_len += len(build[-1])
+        if len(build) > 0:
+            await bot.client.edit_message(self.messages[msg_target],
+                    new_content="".join(build))
 
 
